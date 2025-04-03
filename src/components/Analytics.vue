@@ -61,8 +61,11 @@ const categoryStats = computed(() => {
              category.icon === '✨' ? '#8B5CF6' : 
              category.icon === '💬' ? '#4F46E5' : 
              category.icon === '📊' ? '#059669' : 
-             category.icon === '🧹' ? '#B45309' : 
-             category.icon === '😔' ? '#DC2626' : '#7C3AED'
+             category.icon === '🚧' ? '#2fca09' : 
+             category.icon === '🔒' ? '#59856' : 
+             category.icon === '👪' ? '#C45309' : 
+             category.icon === '✨' ? '#D45309' : 
+             category.icon === '😤' ? '#DC2626' : '#7C3AED'
     };
   });
   

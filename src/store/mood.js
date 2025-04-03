@@ -89,28 +89,7 @@ export const useMoodStore = defineStore('mood', {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split('T')[0];
       
-      this.moods = [
-        {
-          id: uuidv4(),
-          date: today,
-          time: '09:30',
-          category: 'happy',
-          content: '一起吃了喜欢的早餐，开始了美好的一天。',
-          moodType: 'positive',
-          intensity: 1
-        },
-        {
-          id: uuidv4(),
-          date: yesterdayStr,
-          time: '19:00',
-          category: 'comm',
-          content: '关于周末计划有些分歧，讨论后达成了一致。',
-          moodType: 'negative',
-          intensity: 1,
-          resolved: true,
-          resolution: '我们决定周六按她的想法去公园，周日按我的想法去看电影。'
-        }
-      ];
+      this.moods = [];
       
       this.saveData();
     },
@@ -214,6 +193,36 @@ export const useMoodStore = defineStore('mood', {
     // 按类型获取分类
     getCategoriesByType(type) {
       return this.categories.filter(c => c.type === type);
+    },
+    
+    // 保存AI分析结果
+    saveAIAnalysis(moodId, analysisContent) {
+      try {
+        // 加载当前分析数据
+        let analyses = services.loadData('moodsAIAnalyses') || {};
+        // 更新或添加分析
+        analyses[moodId] = {
+          content: analysisContent,
+          timestamp: new Date().toISOString()
+        };
+        // 保存更新后的数据
+        services.saveData('moodsAIAnalyses', analyses);
+        return true;
+      } catch (error) {
+        console.error('保存AI分析失败:', error);
+        return false;
+      }
+    },
+    
+    // 获取AI分析结果
+    getAIAnalysis(moodId) {
+      try {
+        const analyses = services.loadData('moodsAIAnalyses') || {};
+        return analyses[moodId]?.content || null;
+      } catch (error) {
+        console.error('获取AI分析失败:', error);
+        return null;
+      }
     },
     
     // 获取心情记录的月度统计

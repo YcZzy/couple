@@ -127,7 +127,7 @@ const moodCounts = computed(() => {
 
 // 查看指定情绪记录详情
 const viewMoodDetail = (moodId) => {
-  router.push(`/mood/${moodId}`);
+  router.push(`/moods?id=${moodId}`);
 };
 </script>
 

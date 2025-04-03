@@ -73,31 +73,55 @@ window.services = {
           return;
         }
         
-        // 准备争吵数据用于分析
+        // 准备数据用于分析
         const category = categories.find(c => c.id === argument.category);
         const categoryName = category ? category.name : argument.category;
-        const severityLabel = ['轻微', '中等', '严重'][argument.severity - 1];
-        const status = argument.status === 'ongoing' ? '进行中' : '已解决';
+        const intensityLabel = argument.moodType === 'positive' 
+          ? ['微小', '温馨', '难忘'][argument.intensity - 1]
+          : ['轻微', '中等', '强烈'][argument.intensity - 1];
         
         // 构建提示文本
-        const prompt = `作为关系心理学专家，分析以下争吵信息并提供建议：
-争吵日期：${new Date(argument.date).toLocaleDateString()}
-争吵类型：${categoryName}
-严重程度：${severityLabel}
-当前状态：${status}
-争吵内容：${argument.content || '未记录'}
-解决方案：${argument.resolution || '尚未记录'}
-个人反思：${argument.reflection || '尚未记录'}
+        let prompt = '';
+        
+        if (argument.moodType === 'positive') {
+          prompt = `作为情感智能顾问，请分析以下积极情绪记录。根据这段美好时光，提供积极的强化和建议，帮助情侣更好地保持和增强这种积极情绪。
+分析应该包括：
+1. 这种积极情绪的价值和意义
+2. 如何将这种美好时刻的体验延续到日常生活中
+3. 建议如何记录和珍藏这种情感，使其成为关系中的宝贵财富
+4. 如何从中获得成长，加深彼此的连接
 
-请提供以下分 析：
-1. 这次争吵的可能根本原因
-2. 改善沟通的建议
-3. 预防类似争吵的策略
-4. 如何从这次经历中成长`;
+日期: ${new Date(argument.date).toLocaleDateString()}
+分类: ${categoryName}
+情绪类型: 积极情绪
+强度: ${intensityLabel} (${argument.intensity}/3)
+内容: ${argument.content || '无内容'}
+${argument.reflection ? `心得体会: ${argument.reflection}` : ''}
+
+请用温暖、鼓励的语气，提供具体且实用的建议。`;
+        } else {
+          prompt = `作为情感智能顾问，请分析以下情绪记录。根据记录的情绪状况，提供中立、客观的分析和建议，帮助情侣更好地理解和处理这种情绪。
+分析应该包括：
+1. 可能引起这种情绪的根本原因
+2. 双方可以采取哪些具体沟通策略来有效处理
+3. 如何将这种情绪转化为关系成长的机会
+4. 预防类似情绪再次发生的建议
+
+日期: ${new Date(argument.date).toLocaleDateString()}
+分类: ${categoryName}
+情绪类型: 消极情绪
+强度: ${intensityLabel} (${argument.intensity}/3)
+状态: ${argument.resolved ? '已解决' : '未解决'}
+内容: ${argument.content || '无内容'}
+${argument.resolution ? `解决方案: ${argument.resolution}` : ''}
+${argument.reflection ? `感想与反思: ${argument.reflection}` : ''}
+
+请用平和、支持的语气，不要指责任何一方，而是关注解决方案和成长机会。`;
+        }
 
         // 使用 messages 数组
         const messages = [
-          { role: 'system', content: '你是一位专业的关系心理学家，擅长分析伴侣间的争吵并提供有建设性的建议。' },
+          { role: 'system', content: '你是一位专业的关系心理学家，擅长分析伴侣间的情绪并提供有建设性的建议。' },
           { role: 'user', content: prompt }
         ];
 

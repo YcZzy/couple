@@ -6,7 +6,8 @@ import { useMoodStore } from './store/mood';
 // 导入组件
 import Dashboard from './components/Dashboard.vue';
 import MoodLog from './components/MoodLog.vue';
-import MoodDetail from './components/MoodDetail.vue';
+import ArgumentLog from './components/ArgumentLog.vue';
+import ArgumentDetail from './components/ArgumentDetail.vue';
 import Rewards from './components/Rewards.vue';
 import Analytics from './components/Analytics.vue';
 import MoodCalendar from './components/MoodCalendar.vue';

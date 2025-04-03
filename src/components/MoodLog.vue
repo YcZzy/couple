@@ -3,12 +3,30 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useMoodStore } from '../store/mood';
 import dayjs from 'dayjs';
 import AIAnalysis from './AIAnalysis.vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const store = useMoodStore();
+const route = useRoute();
+const router = useRouter();
 
 // 确保store初始化
 onMounted(() => {
   store.init();
+  
+  // 如果URL中有ID参数，自动打开对应的侧边栏详情
+  if (route.query.id) {
+    const mood = store.getMoodById(route.query.id);
+    if (mood) {
+      handleMoodClick(mood);
+      
+      // 清除URL中的参数，避免刷新页面时重复打开
+      if (history.replaceState) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('id');
+        history.replaceState({}, '', url);
+      }
+    }
+  }
 });
 
 // 搜索和筛选
@@ -253,6 +271,30 @@ const openAIAnalysis = () => {
 const closeAIAnalysis = () => {
   showAIAnalysis.value = false;
 };
+
+// 分享心情记录
+const shareMood = () => {
+  if (!selectedMood.value) return;
+  
+  // 生成带有ID参数的URL
+  const url = new URL(window.location.href);
+  url.pathname = '/mood/' + selectedMood.value.id;
+  
+  // 如果支持navigator.clipboard API
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url.toString())
+      .then(() => {
+        alert('链接已复制到剪贴板！');
+      })
+      .catch(err => {
+        console.error('复制链接失败:', err);
+        prompt('请手动复制以下链接:', url.toString());
+      });
+  } else {
+    // 后备方法
+    prompt('请手动复制以下链接:', url.toString());
+  }
+};
 </script>
 
 <template>
@@ -296,7 +338,7 @@ const closeAIAnalysis = () => {
             type="text" 
             v-model="searchTerm" 
             placeholder="搜索记录内容..." 
-            class="input pl-20 w-full"
+            class="input search-input w-full"
           />
           <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -530,6 +572,16 @@ const closeAIAnalysis = () => {
             </button>
             <button 
               v-if="!isEditing" 
+              @click="shareMood" 
+              class="btn btn-outline flex items-center"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+              </svg>
+              分享
+            </button>
+            <button 
+              v-if="!isEditing" 
               @click="deleteMood" 
               class="btn btn-danger flex items-center"
             >
@@ -742,6 +794,10 @@ const closeAIAnalysis = () => {
 
 .input, .select, .textarea {
   @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
+}
+
+.search-input {
+  @apply pl-40;
 }
 
 .animate-slideIn {

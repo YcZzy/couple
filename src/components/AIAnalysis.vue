@@ -1,6 +1,7 @@
 <script setup>
 import { ref, defineProps, defineEmits, onMounted, watch, computed } from 'vue';
 import { useMoodStore } from '../store/mood';
+import servicesAdapter from '../utils/services-adapter';
 
 const props = defineProps({
   argumentId: String,
@@ -106,7 +107,7 @@ const getAnalysis = async (force = false) => {
   analysis.value = ''; // 清空之前的分析结果
   
   try {
-    generateAnalysis();
+    await generateAnalysis();
     
     // 更新保存的分析信息
     savedAnalysis.value = analysis.value;
@@ -117,6 +118,9 @@ const getAnalysis = async (force = false) => {
     if (err.stack) {
       console.error('错误堆栈:', err.stack);
     }
+    
+    // 如果AI分析失败，回退到模板生成
+    fallbackToTemplateAnalysis();
   } finally {
     isLoading.value = false;
     isGeneratingNew.value = false;
@@ -141,10 +145,47 @@ const loadMood = () => {
   currentMood.value = store.getMoodById(props.argumentId);
 };
 
-const generateAnalysis = () => {
+const generateAnalysis = async () => {
   if (!currentMood.value) return;
   
-  // 根据情绪类型生成不同的分析结果
+  try {
+    // 先检查是否支持AI功能
+    if (servicesAdapter.hasAISupport()) {
+      console.log('正在使用uTools AI功能生成分析...');
+      
+      // 准备提示词
+      const prompt = getAnalysisPrompt.value;
+      
+      // 使用服务适配器调用AI功能
+      const aiResponse = await window.services.analyzeArgumentWithAI(currentMood.value, store.categories);
+      
+      if (aiResponse) {
+        // 将AI回复包装在卡片中
+        analysis.value = `
+<div class="bg-white/60 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-${currentMood.value.moodType === 'positive' ? 'teal' : 'amber'}-100">
+  <div class="prose max-w-none">
+    ${aiResponse.replace(/\n/g, '<br>')}
+  </div>
+</div>`;
+        
+        // 保存分析结果
+        store.saveAIAnalysis(props.argumentId, analysis.value);
+        return;
+      }
+    }
+    
+    // 如果AI功能不可用或调用失败，使用模板
+    fallbackToTemplateAnalysis();
+  } catch (error) {
+    console.error('生成AI分析失败:', error);
+    // 使用备用模板
+    fallbackToTemplateAnalysis();
+  }
+};
+
+// 回退到模板分析
+const fallbackToTemplateAnalysis = () => {
+  console.log('回退到模板分析...');
   if (currentMood.value.moodType === 'positive') {
     generatePositiveMoodAnalysis();
   } else {

@@ -15,7 +15,10 @@ const routes = [
   {
     path: '/mood/:id',
     name: 'MoodDetail',
-    component: () => import('../components/MoodDetail.vue')
+    redirect: to => {
+      // 重定向到心情列表页，同时保留ID参数
+      return { path: '/moods', query: { id: to.params.id } };
+    }
   },
   {
     path: '/rewards',
