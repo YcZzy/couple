@@ -1,0 +1,20 @@
+{
+  "main": "index.html",
+  "preload": "preload/services.js",
+  "logo": "logo.png",
+  "development": {
+    "main": "http://localhost:5173"
+  },
+  "features": [
+    {
+      "code": "couple",
+      "explain": "伴侣和睦",
+      "cmds": [
+        "伴侣",
+        "情侣",
+        "dashboard",
+        "couple"
+      ]
+    }
+  ]
+}
