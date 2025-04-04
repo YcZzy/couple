@@ -201,7 +201,7 @@ const viewMoodDetail = (moodId) => {
         <div class="flex items-center">
           <span class="text-3xl mr-3">📚</span>
           <div>
-            <h2 class="font-bold text-teal-800">心情笔记1</h2>
+            <h2 class="font-bold text-teal-800">心情笔记</h2>
             <p class="text-sm text-teal-600">记录和浏览所有情绪</p>
           </div>
         </div>
