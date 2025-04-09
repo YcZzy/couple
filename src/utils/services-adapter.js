@@ -3,8 +3,10 @@
  * 为应用程序提供统一的接口，无论是在uTools插件中还是在浏览器中运行
  */
 
+import { DEEPSEEK_CONFIG, isUToolsEnv } from './config';
+
 // 检测是否在uTools环境中运行
-const isUTools = typeof window.utools !== 'undefined';
+const isUTools = isUToolsEnv;
 
 // uTools环境下的服务实现
 const uToolsServices = {
@@ -175,11 +177,37 @@ const browserServices = {
     }
   },
   
-  // AI功能 - 浏览器环境不提供AI支持
-  hasAISupport: () => false,
+  // AI功能 - 使用DeepSeek API提供AI支持
+  hasAISupport: () => true,
   
-  analyzeWithAI: async () => {
-    return { error: '浏览器环境不支持AI功能' };
+  analyzeWithAI: async (prompt, data) => {
+    try {
+      const response = await fetch(`${DEEPSEEK_CONFIG.baseUrl}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${DEEPSEEK_CONFIG.apiKey}`
+        },
+        body: JSON.stringify({
+          model: DEEPSEEK_CONFIG.model,
+          messages: [
+            { role: 'system', content: '你是一位專業的關係心理學家，擅長分析伴侶間的情緒並提供有建設性的建議。' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`DeepSeek API請求失敗: ${response.status} ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      return result.choices[0].message.content;
+    } catch (error) {
+      console.error('DeepSeek AI分析失敗:', error);
+      return { error: '無法完成AI分析: ' + error.message };
+    }
   },
   
   // 系统功能
@@ -208,7 +236,7 @@ const browserServices = {
 const servicesAdapter = isUTools ? uToolsServices : browserServices;
 
 // 在控制台中显示当前环境
-console.log(`应用当前运行在${isUTools ? 'uTools' : '浏览器'}环境中`);
+console.log(`应用当前运行在${isUTools ? 'uTools' : '浏览器(H5)'}环境中`);
 
 // 如果存在window.services，合并其中的方法
 if (isUTools && typeof window.services !== 'undefined') {
