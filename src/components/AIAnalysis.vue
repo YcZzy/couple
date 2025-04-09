@@ -2,6 +2,7 @@
 import { ref, defineProps, defineEmits, onMounted, watch, computed } from 'vue';
 import { useMoodStore } from '../store/mood';
 import servicesAdapter from '../utils/services-adapter';
+import { isUToolsEnv } from '../utils/config';
 
 const props = defineProps({
   argumentId: String,
@@ -18,6 +19,7 @@ const isGeneratingNew = ref(false);
 const isProcessing = ref(false);
 const isAISupported = ref(true);
 const currentMood = ref(null);
+const isUTools = ref(isUToolsEnv);
 
 // 关闭对话框
 const close = () => {
@@ -69,15 +71,22 @@ ${baseInfo}
 // 检查AI功能支持
 onMounted(() => {
   try {
-    // 检查是否有window.services.checkAISupport方法
-    if (window.services && typeof window.services.checkAISupport === 'function') {
+    // 從配置中獲取環境信息
+    isUTools.value = isUToolsEnv;
+    
+    // 检查AI支持
+    if (isUTools.value && window.services && typeof window.services.checkAISupport === 'function') {
+      // uTools環境中使用原生方法檢查
       isAISupported.value = window.services.checkAISupport();
     } else {
-      isAISupported.value = true; // 默认支持
+      // H5環境使用服務適配器檢查
+      isAISupported.value = servicesAdapter.hasAISupport();
     }
+    
+    console.log(`當前運行環境: ${isUTools.value ? 'uTools' : 'H5瀏覽器'}, AI支持: ${isAISupported.value ? '是' : '否'}`);
   } catch (e) {
     isAISupported.value = false;
-    console.error('检查AI支持时出错:', e);
+    console.error('檢查AI支持時出錯:', e);
   }
 });
 
@@ -151,18 +160,31 @@ const generateAnalysis = async () => {
   try {
     // 先检查是否支持AI功能
     if (servicesAdapter.hasAISupport()) {
-      console.log('正在使用uTools AI功能生成分析...');
-      
       // 准备提示词
       const prompt = getAnalysisPrompt.value;
       
-      // 使用服务适配器调用AI功能
-      const aiResponse = await window.services.analyzeArgumentWithAI(currentMood.value, store.categories);
+      console.log('正在使用AI功能生成分析...');
+      let aiResponse;
       
-      if (aiResponse) {
-        // 将AI回复包装在卡片中
+      // 使用服务适配器调用AI功能
+      if (isUTools.value) {
+        // uTools环境使用window.services
+        aiResponse = await window.services.analyzeArgumentWithAI(currentMood.value, store.categories);
+      } else {
+        // H5环境使用服务适配器的analyzeWithAI
+        aiResponse = await servicesAdapter.analyzeWithAI(prompt, currentMood.value);
+      }
+      
+      if (aiResponse && !aiResponse.error) {
+        // 將AI回复包裝在卡片中，並顯示來源
+        const aiSource = isUTools.value ? 'uTools' : 'DeepSeek';
+        
         analysis.value = `
 <div class="bg-white/60 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-${currentMood.value.moodType === 'positive' ? 'teal' : 'amber'}-100">
+  <div class="flex justify-between items-center mb-2">
+    <h3 class="text-lg font-medium text-${currentMood.value.moodType === 'positive' ? 'teal' : 'amber'}-700">AI情緒分析</h3>
+    <span class="text-xs px-2 py-1 bg-gray-100 rounded-full">${aiSource}提供</span>
+  </div>
   <div class="prose max-w-none">
     ${aiResponse.replace(/\n/g, '<br>')}
   </div>
@@ -171,6 +193,9 @@ const generateAnalysis = async () => {
         // 保存分析结果
         store.saveAIAnalysis(props.argumentId, analysis.value);
         return;
+      } else if (aiResponse && aiResponse.error) {
+        console.error('AI分析返回错误:', aiResponse.error);
+        error.value = aiResponse.error;
       }
     }
     
