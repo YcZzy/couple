@@ -510,62 +510,62 @@ const shareMood = () => {
     <!-- 侧边栏心情详情 -->
     <div 
       v-if="showDetailSidebar" 
-      class="fixed inset-0 bg-black bg-opacity-30 z-50 flex justify-end"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end transition-all duration-300"
       @click.self="closeSidebar"
     >
       <div 
-        class="bg-white w-full max-w-md overflow-y-auto animate-slideIn"
+        class="bg-gray-50/95 w-full max-w-xl overflow-y-auto animate-slideIn shadow-2xl"
         style="height: 100vh;"
       >
-        <div class="p-6">
+        <div class="p-8">
           <!-- 关闭按钮和标题 -->
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold flex items-center">
-              <span v-if="selectedMood" class="mr-2 text-2xl">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold flex items-center">
+              <span v-if="selectedMood" class="mr-3 text-3xl">
                 {{ getCategoryInfo(selectedMood.category).icon }}
               </span>
-              <span v-if="selectedMood">{{ getCategoryInfo(selectedMood.category).name }}</span>
+              <span v-if="selectedMood" class="text-gray-800">{{ getCategoryInfo(selectedMood.category).name }}</span>
               <span 
                 v-if="selectedMood && selectedMood.moodType === 'negative'" 
-                class="ml-2 text-sm px-2 py-1 rounded-full"
+                class="ml-3 text-sm px-3 py-1 rounded-full"
                 :class="selectedMood.resolved ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'"
               >
-                {{ selectedMood.resolved ? '已解决' : '待解决' }}
+                {{ selectedMood.resolved ? '已解決' : '待解決' }}
               </span>
             </h2>
-            <button @click="closeSidebar" class="text-gray-500 hover:text-gray-700">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="closeSidebar" class="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
           
           <!-- 操作按钮 -->
-          <div v-if="selectedMood" class="flex space-x-2 mb-6">
+          <div v-if="selectedMood" class="flex flex-wrap gap-3 mb-8">
             <button 
               v-if="!isEditing" 
               @click="toggleEdit" 
-              class="btn btn-outline flex items-center"
+              class="btn btn-outline flex items-center min-w-[120px] justify-center"
             >
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
               </svg>
-              编辑
+              編輯
             </button>
             <button 
               v-if="!isEditing && selectedMood.moodType === 'negative'" 
               @click="toggleResolved" 
-              class="btn"
+              class="btn min-w-[120px] justify-center"
               :class="selectedMood.resolved ? 'btn-amber' : 'btn-teal'"
             >
-              {{ selectedMood.resolved ? '标记为未解决' : '标记为已解决' }}
+              {{ selectedMood.resolved ? '標記為未解決' : '標記為已解決' }}
             </button>
             <button 
               v-if="!isEditing" 
               @click="openAIAnalysis" 
-              class="btn btn-primary flex items-center"
+              class="btn btn-primary flex items-center min-w-[120px] justify-center"
             >
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
               AI分析
@@ -573,9 +573,9 @@ const shareMood = () => {
             <button 
               v-if="!isEditing" 
               @click="shareMood" 
-              class="btn btn-outline flex items-center"
+              class="btn btn-outline flex items-center min-w-[120px] justify-center"
             >
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
               </svg>
               分享
@@ -583,24 +583,24 @@ const shareMood = () => {
             <button 
               v-if="!isEditing" 
               @click="deleteMood" 
-              class="btn btn-danger flex items-center"
+              class="btn btn-danger flex items-center min-w-[120px] justify-center"
             >
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
-              删除
+              刪除
             </button>
           </div>
           
           <!-- 查看模式 -->
-          <div v-if="selectedMood && !isEditing" class="space-y-6">
+          <div v-if="selectedMood && !isEditing" class="space-y-8">
             <!-- 基本信息卡片 -->
-            <div class="bg-white/80 p-6 rounded-lg shadow-sm border"
-              :class="selectedMood.moodType === 'positive' ? 'border-teal-100' : 'border-amber-100'">
-              <div class="flex justify-between items-start mb-4">
-                <span class="text-sm text-gray-500">{{ formatDate(selectedMood.date, selectedMood.time) }}</span>
+            <div class="bg-white p-6 rounded-lg shadow-lg border-2"
+              :class="selectedMood.moodType === 'positive' ? 'border-teal-200' : 'border-amber-200'">
+              <div class="flex justify-between items-start mb-5">
+                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ formatDate(selectedMood.date, selectedMood.time) }}</span>
                 <span
-                  class="px-3 py-1 text-white rounded-full text-sm font-medium"
+                  class="px-4 py-1.5 text-white rounded-full text-sm font-medium shadow-sm"
                   :style="{ backgroundColor: getIntensityInfo(selectedMood.intensity, selectedMood.moodType).color }"
                 >
                   {{ getIntensityInfo(selectedMood.intensity, selectedMood.moodType).label }}
@@ -608,31 +608,31 @@ const shareMood = () => {
               </div>
               
               <div class="prose max-w-none">
-                <p class="whitespace-pre-line">{{ selectedMood.content }}</p>
+                <p class="whitespace-pre-line text-gray-700 leading-relaxed">{{ selectedMood.content }}</p>
               </div>
             </div>
             
             <!-- 解决方案（仅消极情绪） -->
-            <div v-if="selectedMood.moodType === 'negative'" class="bg-white/80 p-6 rounded-lg shadow-sm border border-blue-100">
-              <h2 class="text-xl font-medium text-blue-700 mb-3 flex items-center">
-                <span class="text-xl mr-2">💡</span>
-                解决方案
+            <div v-if="selectedMood.moodType === 'negative'" class="bg-white p-6 rounded-lg shadow-lg border-2 border-blue-200">
+              <h2 class="text-xl font-bold text-blue-700 mb-4 flex items-center">
+                <span class="text-2xl mr-3">💡</span>
+                解決方案
               </h2>
               <div class="prose max-w-none">
-                <p v-if="selectedMood.resolution" class="whitespace-pre-line">{{ selectedMood.resolution }}</p>
-                <p v-else class="text-gray-500 italic">暂无解决方案，点击编辑添加</p>
+                <p v-if="selectedMood.resolution" class="whitespace-pre-line text-gray-700 leading-relaxed">{{ selectedMood.resolution }}</p>
+                <p v-else class="text-gray-400 italic">暫無解決方案，點擊編輯添加</p>
               </div>
             </div>
             
             <!-- 感想与反思 -->
-            <div class="bg-white/80 p-6 rounded-lg shadow-sm border border-purple-100">
-              <h2 class="text-xl font-medium text-purple-700 mb-3 flex items-center">
-                <span class="text-xl mr-2">✨</span>
-                {{ selectedMood.moodType === 'positive' ? '美好感想' : '感想与反思' }}
+            <div class="bg-white p-6 rounded-lg shadow-lg border-2 border-purple-200">
+              <h2 class="text-xl font-bold text-purple-700 mb-4 flex items-center">
+                <span class="text-2xl mr-3">✨</span>
+                {{ selectedMood.moodType === 'positive' ? '美好感想' : '感想與反思' }}
               </h2>
               <div class="prose max-w-none">
-                <p v-if="selectedMood.reflection" class="whitespace-pre-line">{{ selectedMood.reflection }}</p>
-                <p v-else class="text-gray-500 italic">暂无感想，点击编辑添加</p>
+                <p v-if="selectedMood.reflection" class="whitespace-pre-line text-gray-700 leading-relaxed">{{ selectedMood.reflection }}</p>
+                <p v-else class="text-gray-400 italic">暫無感想，點擊編輯添加</p>
               </div>
             </div>
           </div>
@@ -769,47 +769,49 @@ const shareMood = () => {
 
 <style scoped>
 .btn {
-  @apply px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium;
+  @apply px-6 py-2.5 rounded-xl transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md;
 }
 
 .btn-outline {
-  @apply border border-gray-300 text-gray-700 hover:bg-gray-50;
+  @apply border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400;
 }
 
 .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700;
+  @apply bg-blue-500 text-white hover:bg-blue-600;
 }
 
 .btn-danger {
-  @apply bg-red-600 text-white hover:bg-red-700;
+  @apply bg-red-500 text-white hover:bg-red-600;
 }
 
 .btn-teal {
-  @apply bg-teal-600 text-white hover:bg-teal-700;
+  @apply bg-teal-500 text-white hover:bg-teal-600;
 }
 
 .btn-amber {
-  @apply bg-amber-600 text-white hover:bg-amber-700;
+  @apply bg-amber-500 text-white hover:bg-amber-600;
 }
 
 .input, .select, .textarea {
-  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
+  @apply block w-full rounded-xl border-2 border-gray-200 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
 }
 
 .search-input {
-  @apply pl-40;
+  @apply pl-10;
 }
 
 .animate-slideIn {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideIn {
   from {
     transform: translateX(100%);
+    opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 </style> 
